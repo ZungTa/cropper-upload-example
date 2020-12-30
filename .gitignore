@@ -1,0 +1,4 @@
+node_modules
+uploads/*.png
+package-lock.json
+*Zone.Identifier

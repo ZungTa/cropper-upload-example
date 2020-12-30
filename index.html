@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.9/cropper.min.js" integrity="sha512-9pGiHYK23sqK5Zm0oF45sNBAX/JqbZEP7bSDHyt+nT3GddF+VFIcYNqREt0GDpmFVZI3LZ17Zu9nMMc9iktkCw=="
+    crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.9/cropper.css"
+    integrity="sha512-949FvIQOibfhLTgmNws4F3DVlYz3FmCRRhJznR22hx76SKkcpZiVV5Kwo0iwK9L6BFuY+6mpdqB2+vDIGVuyHg==" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js" integrity="sha512-bZS47S7sPOxkjU/4Bt0zrhEtWx0y0CRkhEp8IckzK+ltifIIE9EMIMTuT/mEzoIMewUINruDBIR/jJnbguonqQ=="
+    crossorigin="anonymous"></script>
+  <title>Document</title>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Cropper</h1>
+    <div class="cropper-container">
+      <img id="crop-image" src="./cookies.jpg" alt="free-image">
+    </div>
+    <button id="send">Send</button>
+  </div>
+</body>
+
+</html>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    console.log('loaded');
+
+    const image = document.getElementById('crop-image');
+    const cropData = {};
+    const cropperOptions = {
+      viewMode: 1, // 크롭 상자가 캔버스 크기를 초과하지 않도록 제한
+      dragMode: 'move',
+      // initialAspectRatio: 1, // 크롭 상자의 가로세로 비율 초기값
+      aspectRatio: 1, // 크롭 상자의 가로세로 비율
+      data: cropData,
+      movable: false, // Enable to move the image.
+      rotatable: false, // Enable to rotate the image.
+      scalable: false, // Enable to scale the image.
+      zoomable: false, // Enable to zoom the image.
+      // cropBoxResizable: false, // Enable to resize the crop box by dragging.
+      minCropBoxWidth: 100, // The minimum width of the crop box. (Note: This size is relative to the page, not the image.)
+      crop(event) {
+        console.log(event.detail.x);
+        console.log(event.detail.y);
+        console.log(event.detail.width);
+        console.log(event.detail.height);
+        console.log(event.detail.rotate);
+        console.log(event.detail.scaleX);
+        console.log(event.detail.scaleY);
+        console.log(cropData);
+      },
+    }
+
+    const cropper = new Cropper(image, cropperOptions);
+
+    document.getElementById('send').addEventListener('click', function () {
+      cropper.getCroppedCanvas().toBlob(blob => {
+        const fileType = blob.type.split('/')[1];
+        const file = new File([blob], `${Date.now()}_cookies.${fileType}`, { type: blob.type });
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        axios.post('http://localhost:8988/upload', formData).then(res => {
+          console.log('res? ', res);
+        })
+      })
+    })
+  })
+</script>
+
+<style>
+  .container {
+    padding: 60px 0;
+    width: 100%;
+  }
+
+  .cropper-container {
+    padding: 30px 0;
+    margin: 0 auto;
+  }
+
+  .crop-image {
+    display: block;
+    max-width: 100%;
+  }
+</style>
